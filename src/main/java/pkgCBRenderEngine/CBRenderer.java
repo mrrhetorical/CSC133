@@ -8,8 +8,7 @@ import pkgCBUtils.CBWindowManager;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwWaitEvents;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -18,33 +17,20 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 public class CBRenderer {
 	private int shader_program;
 	private int NUM_COLS;
-	private Matrix4f viewProjMatrix;
+	private Matrix4f viewProjMatrix = new Matrix4f();
 	private final int VPT = 4; // Vertices per tile
 	private int[] winWidthHeight;
-	private static final int OGL_MATRIX_SIZE = 1;
-	private FloatBuffer myFloatBuffer;
+	private static final int OGL_MATRIX_SIZE = 16;
+	private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
 	private int NUM_ROWS;
 	private int PADDING;
 	private final int EPT = 6; // Indices per tile? Going off of specification UML
-	private static int SIZE;
+	private int SIZE;
 	private CBWindowManager myWM;
 	private int OFFSET;
 	private final int FPV = 2; // Number of floats (coordinates) per vertex
-	private int vpMatLocation;
-	private int renderColorLocation;
-
-	public static void main(String... args) {
-		final int numRows = 6, numCols = 7, polyLength = 50, polyOffset = 10, polyPadding = 20;
-		final int winWidth = (polyLength + polyPadding) * numCols + 2 * polyOffset;
-		final int winHeight = (polyLength + polyPadding) * numRows + 2 * polyOffset;
-		final int winOrgX = 50, winOrgY = 80;
-		final CBWindowManager myWM = CBWindowManager.get(winWidth, winHeight, winOrgX, winOrgY);
-		final CBRenderer myRenderer = new CBRenderer(myWM);
-		myRenderer.PADDING = 20;
-		myRenderer.OFFSET = 10;
-		myRenderer.SIZE = 50;
-		myRenderer.generateTilesVertices(6, 7);
-	}
+	private int vpMatLocation = 0;
+	private int renderColorLocation = 0;
 
 	public CBRenderer(CBWindowManager windowManager) {
 		myWM = windowManager;
@@ -130,10 +116,17 @@ public class CBRenderer {
 	}
 
 	public void render(final int offset, final int padding, final int size, final int numRows, final int numCols) {
+		OFFSET = offset;
+		PADDING = padding;
+		SIZE = size;
+		NUM_ROWS = numRows;
+		NUM_COLS = numCols;
 
+		renderLoop();
 	}
 
 	private void renderLoop() {
+		myWM.updateContextToThis();
 		glfwPollEvents();
 		initOpenGL();
 		renderObjects();
@@ -149,8 +142,8 @@ public class CBRenderer {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			int vbo = glGenBuffers();
 			int ibo = glGenBuffers();
-			float[] vertices = {-20f, -20f, 20f, -20f, 20f, 20f, -20f, 20f};
-			int[] indices = {0, 1, 2, 0, 2, 3};
+			float[] vertices = generateTilesVertices(NUM_ROWS, NUM_COLS);
+			int[] indices = generateTileIndices(NUM_ROWS, NUM_COLS);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, (FloatBuffer) BufferUtils.
 					createFloatBuffer(vertices.length).
@@ -161,7 +154,7 @@ public class CBRenderer {
 					createIntBuffer(indices.length).
 					put(indices).flip(), GL_STATIC_DRAW);
 			glVertexPointer(2, GL_FLOAT, 0, 0L);
-			viewProjMatrix.setOrtho(-100, 100, -100, 100, 0, 10);
+			viewProjMatrix.setOrtho(0, winWidthHeight[0], 0, winWidthHeight[1], 0, 10);
 			glUniformMatrix4fv(vpMatLocation, false,
 					viewProjMatrix.get(myFloatBuffer));
 			glUniform3f(renderColorLocation, 1.0f, 0.498f, 0.153f);
