@@ -25,7 +25,7 @@ public class CBRenderer {
 	private FloatBuffer myFloatBuffer;
 	private int NUM_ROWS;
 	private int PADDING;
-	private static int EPT;
+	private final int EPT = 6; // Indices per tile? Going off of specification UML
 	private static int SIZE;
 	private CBWindowManager myWM;
 	private int OFFSET;
@@ -33,8 +33,23 @@ public class CBRenderer {
 	private int vpMatLocation;
 	private int renderColorLocation;
 
+	public static void main(String... args) {
+		final int numRows = 6, numCols = 7, polyLength = 50, polyOffset = 10, polyPadding = 20;
+		final int winWidth = (polyLength + polyPadding) * numCols + 2 * polyOffset;
+		final int winHeight = (polyLength + polyPadding) * numRows + 2 * polyOffset;
+		final int winOrgX = 50, winOrgY = 80;
+		final CBWindowManager myWM = CBWindowManager.get(winWidth, winHeight, winOrgX, winOrgY);
+		final CBRenderer myRenderer = new CBRenderer(myWM);
+		myRenderer.PADDING = 20;
+		myRenderer.OFFSET = 10;
+		myRenderer.SIZE = 50;
+		myRenderer.generateTilesVertices(6, 7);
+	}
+
 	public CBRenderer(CBWindowManager windowManager) {
-		this.myWM = windowManager;
+		myWM = windowManager;
+
+		winWidthHeight = myWM.getWindowSize();
 	}
 
 	private float[] generateTilesVertices(final int rowTiles, final int columnTiles) {
@@ -66,7 +81,24 @@ public class CBRenderer {
 	}
 
 	private int[] generateTileIndices(final int rows, final int cols) {
-		throw new RuntimeException("Not implemented");
+		int[] indices = new int[rows * cols * EPT];
+
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < cols; col++) {
+				int tileNum = row * cols + col;
+				int startIndex = tileNum * EPT;
+				int startIV = tileNum * VPT;
+
+				indices[startIndex] = startIV;
+				indices[startIndex + 1] = startIV + 1;
+				indices[startIndex + 2] = startIV + 2;
+				indices[startIndex + 3] = startIV;
+				indices[startIndex + 4] = startIV + 2;
+				indices[startIndex + 5] = startIV + 3;
+			}
+		}
+
+		return indices;
 	}
 
 	private void initOpenGL() {
