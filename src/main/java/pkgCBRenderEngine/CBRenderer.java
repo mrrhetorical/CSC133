@@ -15,6 +15,7 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 
 public class CBRenderer {
+
 	private int shader_program;
 	private int NUM_COLS;
 	private Matrix4f viewProjMatrix = new Matrix4f();
@@ -24,7 +25,7 @@ public class CBRenderer {
 	private FloatBuffer myFloatBuffer = BufferUtils.createFloatBuffer(OGL_MATRIX_SIZE);
 	private int NUM_ROWS;
 	private int PADDING;
-	private final int EPT = 6; // Indices per tile? Going off of specification UML
+	private final int EPT = 6; // Indices per tile? Going off of specification UML but that seems to be the only explanation
 	private int SIZE;
 	private CBWindowManager myWM;
 	private int OFFSET;
@@ -43,7 +44,7 @@ public class CBRenderer {
 		for (int row = 0; row < rowTiles; row++) {
 			for (int col = 0; col < columnTiles; col++) {
 				int myIndx = (row * columnTiles + col) * VPT * FPV;
-				float xmin = OFFSET + col * (SIZE * PADDING);
+				float xmin = OFFSET + col * (SIZE + PADDING);
 				float ymin = winWidthHeight[1] - (OFFSET + SIZE + row * (SIZE + PADDING));
 
 				// First vertex
@@ -56,11 +57,11 @@ public class CBRenderer {
 
 				// Third vertex
 				vertices[myIndx + 4] = xmin + SIZE;
-				vertices[myIndx + 5] = ymin - SIZE;
+				vertices[myIndx + 5] = ymin + SIZE;
 
 				// Fourth vertex
 				vertices[myIndx + 6] = xmin;
-				vertices[myIndx + 7] = ymin - SIZE;
+				vertices[myIndx + 7] = ymin + SIZE;
 			}
 		}
 		return vertices;
@@ -122,11 +123,12 @@ public class CBRenderer {
 		NUM_ROWS = numRows;
 		NUM_COLS = numCols;
 
+		myWM.updateContextToThis();
 		renderLoop();
+		myWM.destroyGlfwWindow();
 	}
 
 	private void renderLoop() {
-		myWM.updateContextToThis();
 		glfwPollEvents();
 		initOpenGL();
 		renderObjects();
@@ -145,21 +147,28 @@ public class CBRenderer {
 			float[] vertices = generateTilesVertices(NUM_ROWS, NUM_COLS);
 			int[] indices = generateTileIndices(NUM_ROWS, NUM_COLS);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, (FloatBuffer) BufferUtils.
-					createFloatBuffer(vertices.length).
-					put(vertices).flip(), GL_STATIC_DRAW);
+
+			FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertices.length);
+			vertexBuffer.put(vertices).flip();
+			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW);
+
 			glEnableClientState(GL_VERTEX_ARRAY);
+
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (IntBuffer) BufferUtils.
-					createIntBuffer(indices.length).
-					put(indices).flip(), GL_STATIC_DRAW);
+			IntBuffer indexBuffer = BufferUtils.createIntBuffer(indices.length).put(indices).flip();
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW);
+
 			glVertexPointer(2, GL_FLOAT, 0, 0L);
+
+			// Set view projection matrix
 			viewProjMatrix.setOrtho(0, winWidthHeight[0], 0, winWidthHeight[1], 0, 10);
 			glUniformMatrix4fv(vpMatLocation, false,
 					viewProjMatrix.get(myFloatBuffer));
+
 			glUniform3f(renderColorLocation, 1.0f, 0.498f, 0.153f);
+
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			final int VTD = 6; // need to process 6 Vertices To Draw 2 triangles
+			final int VTD = indices.length; // Need to draw this many vertices (Vertices to draw?)
 			glDrawElements(GL_TRIANGLES, VTD, GL_UNSIGNED_INT, 0L);
 			myWM.swapBuffers();
 		}

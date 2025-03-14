@@ -89,8 +89,9 @@ public class CBWindowManager {
 	}
 
 	public int[] getWindowSize() {
-		IntBuffer windowSize = BufferUtils.createIntBuffer(2);
-		glfwGetWindowSize(glfwWindow, windowSize, windowSize);
-		return new int[]{windowSize.get(0), windowSize.get(1)};
+		IntBuffer width = BufferUtils.createIntBuffer(1);
+		IntBuffer height = BufferUtils.createIntBuffer(1);
+		glfwGetWindowSize(glfwWindow, width, height);
+		return new int[]{width.get(0), height.get(0)};
 	}
 }
