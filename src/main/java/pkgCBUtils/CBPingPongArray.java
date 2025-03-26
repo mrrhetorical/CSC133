@@ -55,16 +55,36 @@ public class CBPingPongArray {
 		//todo: load file
 	}
 
+	public record RCPair(int row, int col) {}
+
+	public RCPair[] getNearestNeighborsArray(int orgRow, int orgCol) {
+		RCPair[] neighbors = new RCPair[9];
+		int index = 0;
+		for (int row = -1; row <= 1; row++) {
+			for (int col = -1; col <= 1; col++) {
+
+				if (row == 0 && col == 0)
+					continue;
+
+				int neighborRow = (orgRow + row + ROWS) % ROWS;
+				int neighborCol = (orgCol + col + COLS) % COLS;
+
+				neighbors[index++] = new RCPair(neighborRow, neighborCol);
+			}
+		}
+		return neighbors;
+	}
+
 	public int[][] getArray() {
 		return Arrays.copyOf(liveArr, liveArr.length);
 	}
 
 	public void copyToNextArray() {
-		//todo: unsure what implementation should do
+		System.arraycopy(liveArr, 0, nextArr, 0, liveArr.length);
 	}
 
 	public void set(int row, int col, int newValue) {
-		//todo: update next array at row/col with value
+		nextArr[row][col] = newValue;
 	}
 
 	public void setCell(int row, int col, int newValue) {
@@ -73,7 +93,15 @@ public class CBPingPongArray {
 	}
 
 	public void updateToNNSum() {
-		//todo: update nextArray to the sum of the nearest neighbor elements in the liveArray
+		for (int row = 0; row < ROWS; row++) {
+			for (int col = 0; col < COLS; col++) {
+				int sum = 0;
+				for (RCPair neighbor : getNearestNeighborsArray(row, col)) {
+					sum += liveArr[neighbor.row][neighbor.col];
+				}
+				nextArr[row][col] = sum;
+			}
+		}
 	}
 
 	public void updateToNearestNNSum() {
@@ -86,7 +114,9 @@ public class CBPingPongArray {
 	}
 
 	public void swapLiveAndNext() {
-
+		int[][] temp = liveArr;
+		liveArr = nextArr;
+		nextArr = temp;
 	}
 
 
