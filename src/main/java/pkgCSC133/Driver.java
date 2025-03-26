@@ -1,18 +1,48 @@
 package pkgCSC133;
 
-import pkgCBRenderEngine.CBRenderer;
-import pkgCBUtils.CBWindowManager;
+import pkgCBUtils.CBPingPongArray;
 
 public class Driver {
+    public static void main(String[] my_args) {
+        final int ROWS = 7, COLS = 7;
+        int myMin = 10, myMax = 20;
+        CBPingPongArray myBoard = new CBPingPongArray(ROWS, COLS, myMin, myMax);
+        myBoard.swapLiveAndNext();
+        System.out.println("[10, 20) Board:");
+        myBoard.printArray();
 
-	public static void main(String[] args) {
-		final int numRows = 6, numCols = 7, polyLength = 50, polyOffset = 10, polyPadding = 20;
-		final int winWidth = (polyLength + polyPadding) * numCols + 2 * polyOffset;
-		final int winHeight = (polyLength + polyPadding) * numRows + 2 * polyOffset;
-		final int winOrgX = 50, winOrgY = 80;
-		final CBWindowManager myWM = CBWindowManager.get(winWidth, winHeight, winOrgX, winOrgY);
-		final CBRenderer myRenderer = new CBRenderer(myWM);
-		myRenderer.render(polyOffset, polyPadding, polyLength, numRows, numCols);
-	} // public static void main(String[] args)
+        for (int row = 0; row < ROWS; ++row) {
+            for (int col = 0; col < COLS; ++col) {
+                myBoard.setCell(row, col, col);
+            }  //  for(int col = 0; col < COLS; ++col)
+        }  //  for(int row = 0; row < ROWS; ++row)
+        myBoard.swapLiveAndNext();
+        System.out.println("\n[0, COLS) Board:");
+        myBoard.printArray();
 
+        myBoard.randomizeViaFisherYatesKnuth();
+        myBoard.swapLiveAndNext();
+        System.out.println("\n[0, COLS) Board Randomized via FYK algorithm:");
+        myBoard.printArray();
+
+        myBoard.loadFile("neighbors_test.txt");
+        System.out.println("\n[0, 1] data file array:");
+        myBoard.swapLiveAndNext();
+        myBoard.printArray();
+
+        myBoard.updateToNearestNNSum();
+        myBoard.swapLiveAndNext();
+        System.out.println("\nNearest Neighbor sum array:");
+        myBoard.printArray();
+        myBoard.save("test_sum.txt");
+
+    }  //  public static void main(String[] my_args)
 }  //  public class Driver
+
+
+
+
+
+
+
+
