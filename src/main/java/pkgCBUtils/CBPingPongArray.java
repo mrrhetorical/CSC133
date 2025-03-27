@@ -1,18 +1,22 @@
 package pkgCBUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.Scanner;
 
 public class CBPingPongArray {
 
 	private int [][] liveArr;
 	private int [][] nextArr;
 
-	private final int ROWS,
+	private int ROWS,
 			COLS,
 			RAND_MIN,
-			RAND_MAX;
+			RAND_MAX,
+			DEFAULT_VALUE = 99;
 
-	private static final int DEFAULT_VALUE = 99;
 
 	public CBPingPongArray(int numRows, int numCols, int randMin, int randMax) {
 		ROWS = numRows;
@@ -24,12 +28,32 @@ public class CBPingPongArray {
 		liveArr = new int[ROWS][COLS];
 		nextArr = new int[ROWS][COLS];
 
+		for (int r = 0; r < ROWS; r++) {
+			for (int c = 0; c < COLS; c++) {
+				liveArr[r][c] = DEFAULT_VALUE;
+				nextArr[r][c] = DEFAULT_VALUE;
+			}
+		}
+
 		randomize();
-		//todo: complete method
 	}
 
 	public void randomize() {
-		//todo: use fisher-yates-knuth alrogithm to randomize. Don't replace values
+		Random rand = new Random();
+		int length = ROWS * COLS;
+		//Not converting to a 1d array. Instead, will be treating index as a 1d index and converting to 2d indices.
+		for (int i = 0; i < length; i++) {
+			int currentRow = i / COLS;
+			int currentCol = i % COLS;
+
+			int j = rand.nextInt(length);
+
+			int newRow = j / COLS;
+			int newCol = j % COLS;
+
+			nextArr[currentRow][currentCol] = liveArr[newRow][newCol];
+		}
+
 	}
 
 	public void randomizeInRange() {
@@ -52,7 +76,26 @@ public class CBPingPongArray {
 
 
 	public void loadFile(String dataFileName) {
-		//todo: load file
+		Scanner scanner;
+
+		try {
+			scanner = new Scanner(new File(dataFileName));
+		} catch (FileNotFoundException e) {
+			System.err.println("File not found: " + dataFileName);
+			return;
+		}
+
+		DEFAULT_VALUE = scanner.nextInt();
+		ROWS = scanner.nextInt();
+		COLS = scanner.nextInt();
+
+		for (int row = 0; row < ROWS; row++) {
+			// ignores the row header
+			scanner.nextInt();
+			for (int col = 0; col < COLS; col++) {
+				nextArr[row][col] = scanner.nextInt();
+			}
+		}
 	}
 
 	public record RCPair(int row, int col) {}
