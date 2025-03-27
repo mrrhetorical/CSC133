@@ -1,7 +1,6 @@
 package pkgCBUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
@@ -38,26 +37,34 @@ public class CBPingPongArray {
 		randomize();
 	}
 
+	// Gets the value at the normalized index for the 2d array given a 1d index
+	private int getValueAt1dIndex(final int[][] arr, int index) {
+		return arr[index / ROWS][index % COLS];
+	}
+
+	// Sets the value at the normalized index in the 2d array given a 1d index
+	private void setValueAt1dIndex(int[][] arr, int index, int value) {
+		arr[index / ROWS][index % COLS] = value;
+	}
+
 	public void randomize() {
 		Random rand = new Random();
 		int length = ROWS * COLS;
 		//Not converting to a 1d array. Instead, will be treating index as a 1d index and converting to 2d indices.
 		for (int i = 0; i < length; i++) {
-			int currentRow = i / COLS;
-			int currentCol = i % COLS;
-
 			int j = rand.nextInt(length);
 
-			int newRow = j / COLS;
-			int newCol = j % COLS;
-
-			nextArr[currentRow][currentCol] = liveArr[newRow][newCol];
+			setValueAt1dIndex(nextArr, i, getValueAt1dIndex(liveArr, j));
 		}
 
 	}
 
 	public void randomizeInRange() {
-		//
+		Random rand = new Random();
+		int length = ROWS * COLS;
+		for (int i = 0; i < length; i++) {
+			setValueAt1dIndex(nextArr, i, rand.nextInt(RAND_MIN, RAND_MAX));
+		}
 	}
 
 	public void randomizeViaFisherYatesKnuth() {
@@ -66,7 +73,40 @@ public class CBPingPongArray {
 	}
 
 	public void save(String fileName) {
-		//todo: save LIVE array to file
+
+		File file = new File(fileName);
+
+		if (!file.exists()) {
+			try {
+				if (!file.createNewFile())
+					throw new IOException("Could not create file " + fileName);
+			} catch (IOException e) {
+				System.err.printf("Could not create save file \"%s\"!\n", fileName);
+				e.printStackTrace();
+				return;
+			}
+		}
+
+		// Auto clean up so I don't have to close by using this sytle of try-catch
+		try (BufferedWriter outputStream = new BufferedWriter(new FileWriter(fileName))) {
+
+			outputStream.write(String.format("%d\n%d %d\n", DEFAULT_VALUE, ROWS, COLS));
+
+			for (int r = 0; r < ROWS; r++) {
+				outputStream.write(String.format("%d  ", r));
+				for (int c = 0; c < COLS; c++) {
+					outputStream.write(String.format("%d ", liveArr[r][c]));
+				}
+				outputStream.write("\n");
+			}
+
+
+			outputStream.flush();
+		} catch (IOException e) {
+			System.err.printf("Could not save file \"%s\"!\n", fileName);
+			e.printStackTrace();
+			return;
+		}
 	}
 
 	public void save() {
@@ -101,7 +141,7 @@ public class CBPingPongArray {
 	public record RCPair(int row, int col) {}
 
 	public RCPair[] getNearestNeighborsArray(int orgRow, int orgCol) {
-		RCPair[] neighbors = new RCPair[9];
+		RCPair[] neighbors = new RCPair[8];
 		int index = 0;
 		for (int row = -1; row <= 1; row++) {
 			for (int col = -1; col <= 1; col++) {
@@ -153,7 +193,13 @@ public class CBPingPongArray {
 	}
 
 	public void printArray() {
-		//todo: print array
+		for (int row = 0; row < ROWS; row++) {
+			System.out.printf(row + "  ");
+			for (int col = 0; col < COLS; col++) {
+				System.out.printf(liveArr[row][col] + " ");
+			}
+			System.out.println();
+		}
 	}
 
 	public void swapLiveAndNext() {
