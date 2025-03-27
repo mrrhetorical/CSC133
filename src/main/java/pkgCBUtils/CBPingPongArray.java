@@ -130,12 +130,23 @@ public class CBPingPongArray {
 		COLS = scanner.nextInt();
 
 		for (int row = 0; row < ROWS; row++) {
+			Scanner rowScanner = new Scanner(scanner.nextLine());
+
 			// ignores the row header
 			scanner.nextInt();
-			for (int col = 0; col < COLS; col++) {
-				nextArr[row][col] = scanner.nextInt();
+
+			int col = 0;
+			while (rowScanner.hasNextInt()) {
+				nextArr[row][col++] = rowScanner.nextInt();
 			}
+
+			for (; col < COLS; col++) {
+				nextArr[row][col] = DEFAULT_VALUE;
+			}
+			rowScanner.close();
 		}
+
+		scanner.close();
 	}
 
 	public record RCPair(int row, int col) {}
