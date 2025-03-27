@@ -1,9 +1,10 @@
 package pkgCBUtils;
 
+import java.util.List;
 import java.io.*;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CBPingPongArray {
 
@@ -27,10 +28,12 @@ public class CBPingPongArray {
 		liveArr = new int[ROWS][COLS];
 		nextArr = new int[ROWS][COLS];
 
+		Random rand = new Random();
+
 		for (int r = 0; r < ROWS; r++) {
 			for (int c = 0; c < COLS; c++) {
-				liveArr[r][c] = DEFAULT_VALUE;
-				nextArr[r][c] = DEFAULT_VALUE;
+				liveArr[r][c] = rand.nextInt(randMin, randMax);
+				nextArr[r][c] = rand.nextInt(randMin, randMax);
 			}
 		}
 
@@ -61,9 +64,14 @@ public class CBPingPongArray {
 
 	public void randomizeInRange() {
 		Random rand = new Random();
+		List<Integer> values = IntStream.range(0, ROWS * COLS).boxed().collect(Collectors.toList());
+
 		int length = ROWS * COLS;
 		for (int i = 0; i < length; i++) {
-			setValueAt1dIndex(nextArr, i, rand.nextInt(RAND_MIN, RAND_MAX));
+			int index = rand.nextInt(values.size());
+			int value = values.remove(index);
+
+			setValueAt1dIndex(nextArr, i, value);
 		}
 	}
 
@@ -130,10 +138,10 @@ public class CBPingPongArray {
 		COLS = scanner.nextInt();
 
 		for (int row = 0; row < ROWS; row++) {
-			Scanner rowScanner = new Scanner(scanner.nextLine());
-
 			// ignores the row header
 			scanner.nextInt();
+
+			Scanner rowScanner = new Scanner(scanner.nextLine());
 
 			int col = 0;
 			while (rowScanner.hasNextInt()) {
