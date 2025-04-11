@@ -17,16 +17,22 @@ public class CBPingPongArray {
 			RAND_MAX,
 			DEFAULT_VALUE = 99;
 
-
-	public CBPingPongArray(int numRows, int numCols, int randMin, int randMax) {
+	protected CBPingPongArray(int numRows, int numCols) {
 		ROWS = numRows;
 		COLS = numCols;
 
-		RAND_MIN = randMin;
-		RAND_MAX = randMax;
-
-		liveArr = new int[ROWS][COLS];
 		nextArr = new int[ROWS][COLS];
+		liveArr = new int[ROWS][COLS];
+
+		for (int i = 0; i < ROWS; i++) {
+			Arrays.fill(nextArr[i], DEFAULT_VALUE);
+			Arrays.fill(liveArr[i], DEFAULT_VALUE);
+		}
+
+	}
+
+	public CBPingPongArray(int numRows, int numCols, int randMin, int randMax) {
+		this(numRows, numCols);
 
 		Random rand = new Random();
 
