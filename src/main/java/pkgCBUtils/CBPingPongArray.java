@@ -60,11 +60,16 @@ public class CBPingPongArray {
 	public void randomize() {
 		Random rand = new Random();
 		int length = ROWS * COLS;
+
+		copyToNextArray();
+
 		//Not converting to a 1d array. Instead, will be treating index as a 1d index and converting to 2d indices.
 		for (int i = 0; i < length; i++) {
 			int j = rand.nextInt(length);
 
-			setValueAt1dIndex(nextArr, i, getValueAt1dIndex(liveArr, j));
+			int temp = getValueAt1dIndex(nextArr, i);
+			setValueAt1dIndex(nextArr, i, getValueAt1dIndex(nextArr, j));
+			setValueAt1dIndex(nextArr, j, temp);
 		}
 
 	}
@@ -189,7 +194,9 @@ public class CBPingPongArray {
 	}
 
 	public void copyToNextArray() {
-		System.arraycopy(liveArr, 0, nextArr, 0, liveArr.length);
+		for (int i = 0; i < ROWS * COLS; i++) {
+			setValueAt1dIndex(nextArr, i, getValueAt1dIndex(liveArr, i));
+		}
 	}
 
 	public void set(int row, int col, int newValue) {

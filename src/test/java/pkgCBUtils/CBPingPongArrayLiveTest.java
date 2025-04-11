@@ -1,7 +1,6 @@
 package pkgCBUtils;
 
 import java.util.Arrays;
-import java.util.Random;
 
 public class CBPingPongArrayLiveTest {
 	public static void main(String[] args) {
@@ -75,7 +74,6 @@ public class CBPingPongArrayLiveTest {
 			// Verify the amount of live cells is the same after
 			arr.randomizeViaFisherYatesKnuth();
 			arr.swapLiveAndNext();
-			arr.printArray();
 
 			int aliveCells = 0;
 			final int[][] arrayValues = arr.getArray();
@@ -90,10 +88,6 @@ public class CBPingPongArrayLiveTest {
 			if (aliveCells != 10)
 				return false;
 		}
-
-
-
-
 
 		return true;
 	}
