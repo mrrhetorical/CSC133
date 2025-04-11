@@ -38,8 +38,9 @@ public class CBPingPongArray {
 
 		for (int r = 0; r < ROWS; r++) {
 			for (int c = 0; c < COLS; c++) {
-				liveArr[r][c] = rand.nextInt(randMin, randMax);
-				nextArr[r][c] = rand.nextInt(randMin, randMax);
+				int val = rand.nextInt(randMin, randMax);
+				liveArr[r][c] = val;
+				nextArr[r][c] = val;
 			}
 		}
 

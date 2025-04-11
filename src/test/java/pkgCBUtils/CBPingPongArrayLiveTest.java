@@ -1,6 +1,7 @@
 package pkgCBUtils;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class CBPingPongArrayLiveTest {
 	public static void main(String[] args) {
@@ -41,7 +42,7 @@ public class CBPingPongArrayLiveTest {
 
 		int[][] bArr = new int[5][5];
 		for (int r = 0; r < 5; r++) {
-			Arrays.fill(bArr[r], 99);
+			Arrays.fill(bArr[r], 0);
 		}
 
 		return Arrays.deepEquals(arr.getArray(), bArr);
@@ -65,6 +66,33 @@ public class CBPingPongArrayLiveTest {
 	}
 
 	private static boolean ult_d() {
+		CBPingPongArrayLive arr = new CBPingPongArrayLive(5, 5, 10);
+		arr.swapLiveAndNext();
+
+		// It was not clear from the assignment instructions how we are supposed to test randomization.
+
+		for (int i = 0; i < 5; i++) {
+			// Verify the amount of live cells is the same after
+			arr.randomizeViaFisherYatesKnuth();
+			arr.swapLiveAndNext();
+			arr.printArray();
+
+			int aliveCells = 0;
+			final int[][] arrayValues = arr.getArray();
+			for (int r = 0; r < 5; r++) {
+				for (int c = 0; c < 5; c++) {
+					if (arrayValues[r][c] == 1) {
+						aliveCells++;
+					}
+				}
+			}
+
+			if (aliveCells != 10)
+				return false;
+		}
+
+
+
 
 
 		return true;

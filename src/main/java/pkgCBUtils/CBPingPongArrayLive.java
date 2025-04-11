@@ -9,11 +9,11 @@ public class CBPingPongArrayLive extends CBPingPongArray {
 		super(numRows, numCols);
 
 		for (int r = 0, cellsLeft = numLiveCells; r < numRows; r++) {
-			for (int c = 0; c < numCols && cellsLeft > 0; c++, numLiveCells--) {
-				set(r, c, ALIVE);
+			for (int c = 0; c < numCols; c++, cellsLeft--) {
+				set(r, c, cellsLeft > 0 ? ALIVE : DEAD);
 			}
 		}
-
+		swapLiveAndNext();
 		randomizeViaFisherYatesKnuth();
 	}
 
